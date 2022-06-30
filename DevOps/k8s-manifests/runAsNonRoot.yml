@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #[PROJECT_NAME]
+  labels:
+      app: #[PROJECT_NAME]
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #[PROJECT_NAME]
+  template:
+    metadata:
+      labels:
+        app: #[PROJECT_NAME]
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+      - name: #[PROJECT_NAME]
+        image: #[REGISTRY_URL]
+        imagePullPolicy: Always
+        securityContext:
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 999
+        ports:
+          - containerPort: 7070
+      imagePullSecrets:
+      - name: #[SECRET_NAME]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: #[PROJECT_NAME]
+spec:
+  selector:
+    app: #[PROJECT_NAME]
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 7070
+      targetPort: 7070

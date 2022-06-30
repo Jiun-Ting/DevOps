@@ -1,0 +1,21 @@
+apiVersion: skaffold/v2beta23
+kind: Config
+metadata:
+  name: #[PROJECT_NAME]
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: # [REGISTRY_URL]
+      docker:
+        dockerfile: Dockerfile
+deploy:
+  helm:
+    releases:
+      - name: #[PROJECT_NAME]
+        namespace: #[NS]
+        chartPath: #[CHART_PATH]
+        artifactOverrides:
+          imageKey: # [REGISTRY_URL]
+        imageStrategy:
+          helm: {}

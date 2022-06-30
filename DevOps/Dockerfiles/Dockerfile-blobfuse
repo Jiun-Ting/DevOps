@@ -1,0 +1,38 @@
+FROM python:3.7
+RUN apt-get update -y && apt-get install -y wget apt-utils \
+    && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && apt-get remove -y wget \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends fuse blobfuse libcurl3-gnutls libgnutls30
+
+RUN python3 -m pip install --upgrade pip
+
+
+ARG UID=1001
+ARG GID=1001
+ARG APP_ID=[APP_ID]
+ARG APP_PATH=/[APP_ID]
+RUN useradd -r -u ${UID} ${APP_ID}
+RUN mkdir -p ${APP_PATH}
+RUN chown ${APP_ID} ${APP_PATH}
+
+WORKDIR ${APP_PATH}
+COPY --chown=${UID}:${GID} ./requirements.txt .
+RUN pip install setuptools==58
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN mkdir -m 777 /mnt/resource/blobfusetmp -p
+RUN mkdir -m 777 [MOUNT_DEST] -p
+RUN chown -R ${APP_ID} /mnt/resource/blobfusetmp
+RUN chown -R ${APP_ID} [MOUNT_DEST]
+COPY --chown=${UID}:${GID} ./fuse_connection.cfg /fuse_connection.cfg
+
+
+COPY --chown=${UID}:${GID}  . .
+
+ENV PYTHONPATH=${APP_PATH}
+USER ${APP_ID}
+CMD ["./entrypoint.sh"]
+
+

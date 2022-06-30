@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+  api:
+    build:
+      context: .
+    image: ${IMAGE_APP_TAG}
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    container_name: 
+    ports:
+      - "9090:9090"
+    environment:
+      - 
+    volumes:
+      - 
+
+  worker:
+    image: ${IMAGE_APP_TAG}
+    build:
+      context: .
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+
+    command: ["./entrypoint-worker.sh"]
+    environment:
+      - REDIS_HOST=redis
+    links:
+      - redis
+
+  redis:
+    image: redis
